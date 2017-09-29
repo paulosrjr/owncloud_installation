@@ -1,0 +1,66 @@
+- name: "Creating a OwnCloud instance"
+  ec2:
+    state: "{{aws_state}}"
+    key_name: owncloud
+    region: "{{aws_region}}"
+    group_id: "{{OwnCloudVpcId}}"
+    instance_type: "{{aws_instance_type}}"
+    image: "{{aws_instance_ami}}"
+    wait: yes
+    wait_timeout: 500
+    count: 1
+    instance_tags:
+       App: "OwnCloud"
+       Name: "OwnCloudInstance"
+    vpc_subnet_id: "{{OwnCloudSubnetId}}"
+    assign_public_ip: yes
+  register: OwnCloudEC2
+  
+- debug:
+    msg: "{{OwnCloudEC2}}"
+  when: run_in_debug == true
+
+- name: "Save Security Group ID"
+  set_fact:
+    OwnCloudEC2Id: "{{ OwnCloudEC2.instance_ids }}"
+
+- name: "Create a EIP"
+  ec2_eip:
+    state: "{{aws_state}}"
+    region: "{{aws_region}}"
+    in_vpc: yes
+    release_on_disassociation: yes
+    device_id: "{{item}}"
+  with_items: 
+    - "{{OwnCloudEC2Id}}"
+  register: OwnCloudEIP
+  ignore_errors: true
+
+- name: "Rollback OwnCloud instance"
+  ec2:
+    state: "absent"
+    instance_ids: "{{OwnCloudEC2Id}}"
+  when: OwnCloudEIP|failed
+    
+- debug:
+    msg: "{{OwnCloudEIP}}"
+  when: run_in_debug == true
+
+- name: "Save EIP ID"
+  set_fact:
+    OwnCloudEIPId: "{{ item.item }}"
+  with_items: "{{ OwnCloudEIP.results }}"
+
+- debug:
+    msg: "{{OwnCloudEIPId}}"
+  when: run_in_debug == true
+
+- name: "Save EIP IP"
+  set_fact:
+    OwnCloudEIPIP: "{{ item.public_ip }}"
+  with_items: "{{ OwnCloudEIP.results }}"
+
+- debug:
+    msg: "{{OwnCloudEIPIP}}"
+  when: run_in_debug == true
+  

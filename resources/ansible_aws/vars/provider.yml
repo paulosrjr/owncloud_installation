@@ -1,0 +1,8 @@
+---
+aws_state: present #absent
+aws_region: "us-east-1"
+aws_region_az: "us-east-1a"
+aws_cidr_block: "10.30.0.0/16"
+aws_owncloud_subnet: "10.30.1.0/24"
+aws_instance_ami: "ami-cd0f5cb6"
+aws_instance_type: "t2.micro"
