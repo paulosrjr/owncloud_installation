@@ -1,4 +1,5 @@
 Jinja2
 boto
 boto3
-botocore
+botocore 
+ansible[azure]
