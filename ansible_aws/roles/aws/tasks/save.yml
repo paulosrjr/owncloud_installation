@@ -1,0 +1,31 @@
+---
+- name: "Save host and IP in hosts file"
+  copy: 
+    content: |
+      [owncloud]
+      {{OwnCloudEIPIP}}
+    dest: "{{playbook_dir}}/hosts"
+    force: yes
+  register: ansible_host_file
+
+- name: "Save Key"
+  set_fact:
+    OwnCloudPriKeyVar: "{{ OwnCloudPriKeyContent | default('Key already exist in default path') }}"
+  ignore_errors: true
+  when: ansible_host_file|success
+
+- name: "Save generated data"
+  copy: 
+    content: |
+      "hostname": "owncloud"
+      "address": "{{OwnCloudEIPIP}}"
+      "id": "{{OwnCloudEIPId}}"
+      "key": "{{OwnCloudPriKeyVar}}"
+      "sg": "{{OwnCloudVpcSg}}"
+      "vpc": "{{OwnCloudVpcId}}"
+      "subnet": "{{OwnCloudSubnetId}}"
+      "igw": "{{OwnCloudIgwId}}"
+      "route": "{{OwnCloudRouteId}}"
+    dest: "{{playbook_dir}}/owncloud_data.yml"
+    force: yes
+  when: ansible_host_file|success

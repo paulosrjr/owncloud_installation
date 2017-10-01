@@ -20,6 +20,15 @@
     msg: "{{OwnCloudEC2}}"
   when: run_in_debug == true
 
+- name: "Wait instance SSH"
+  wait_for:
+    host: "{{ item.public_dns_name }}"
+    port: 22
+    delay: 60
+    timeout: 320
+    state: started
+  with_items: "{{ OwnCloudEC2.instances }}"
+
 - name: "Save Security Group ID"
   set_fact:
     OwnCloudEC2Id: "{{ OwnCloudEC2.instance_ids }}"
@@ -63,4 +72,3 @@
 - debug:
     msg: "{{OwnCloudEIPIP}}"
   when: run_in_debug == true
-  

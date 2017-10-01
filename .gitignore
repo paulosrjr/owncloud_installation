@@ -1,0 +1,5 @@
+owncloud_data
+key
+*.log
+.vscode
+.env

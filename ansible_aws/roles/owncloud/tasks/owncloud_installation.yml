@@ -1,0 +1,31 @@
+- name: "Start MySQL"
+  docker_container:
+    name: mysql_owncloud
+    image: mysql:5.7
+    state: started
+    restart_policy: always
+    recreate: yes
+    ports:
+      - "3306:3306"
+    volumes:
+      - "/storage/mysql/data:/var/lib/mysql"
+    env:
+      MYSQL_ROOT_PASSWORD: mypasswordtest
+      MYSQL_DATABASE: owncloud
+      MYSQL_USER: owncloud
+      MYSQL_PASSWORD: mypasswordtest
+  
+- name: "Start OwnCloud"
+  docker_container:
+    name: owncloud
+    image: owncloud
+    state: started
+    restart_policy: always
+    recreate: yes
+    links:
+     - "mysql_owncloud:mysql_owncloud"
+    ports:
+     - "8080:80"
+    volumes:
+      - "/storage/owncloud/html:/var/www/html"
+      - "/storage/owncloud/data:/var/www/owncloud"

@@ -1,0 +1,19 @@
+---
+- hosts: owncloud
+  tags:
+    - owncloud
+  remote_user: ubuntu
+  become: yes
+  gather_facts: false
+  vars:
+    ansible_ssh_private_key_file: key
+    owncloud_first_configuration: true
+  vars_files:
+    - "vars/owncloud.yml"
+  pre_tasks:
+    - name: "Installing python if not founded"
+      raw: test -e /usr/bin/python || (apt-get update && apt-get install -y python)
+    - name: "Configuring facts"
+      setup:
+  roles:
+    - owncloud

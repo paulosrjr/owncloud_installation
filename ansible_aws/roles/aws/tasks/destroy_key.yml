@@ -1,0 +1,12 @@
+---
+- name: "Remove private key in provider"
+  ec2_key:
+    state: "absent"
+    name: owncloud
+    force: true
+    region: "{{aws_region}}"
+
+- name: "Remove private key file"
+  file: 
+    path: "{{playbook_dir}}/key"
+    state: "absent"

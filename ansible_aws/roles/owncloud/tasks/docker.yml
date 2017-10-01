@@ -1,0 +1,41 @@
+- name: "Installing packages"
+  apt:
+    name: "{{ item }}"
+    update_cache: yes
+    state: present
+  with_items:
+    - "{{ packages }}"
+
+- name: "Installing pip packages"
+  pip:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ pip }}"
+
+- name: "Configuring repo keys"
+  apt_key:
+    url: "{{ item }}"
+    state: present
+    validate_certs: no
+  with_items:
+    - "{{ repositories_urls_keys }}"
+
+- name: "Configuring repos" 
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+  with_items:
+    - "{{ repositories }}"
+
+- name: "Installing docker"
+  apt:
+    name: "docker-ce"
+    update_cache: yes
+    state: present
+
+- name: "Running docker"
+  service:
+    name: "docker"
+    enabled: yes
+    state: started

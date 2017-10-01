@@ -1,0 +1,26 @@
+- name: "OwnCloud Default Config"
+  template:
+    src: "templates/config.sample.php"
+    dest: "/storage/owncloud/html/config/config.php"
+    owner: www-data
+    group: nogroup
+    mode: 0644
+
+- name: "OwnCloud File Copy"
+  copy:
+    src: "files/owncloud_data/"
+    dest: "/storage/owncloud/html/data/"
+    owner: www-data
+    group: www-data
+    mode: 0755
+    force: yes
+  become: true
+
+- name: "OwnCloud Database File"
+  template:
+    src: "templates/dump.sql"
+    dest: "/storage/mysql/data/dump.sql"
+
+- name: "Database configurarion"
+  shell: docker exec mysql_owncloud /bin/bash -c "mysql -uroot -pmypasswordtest < /var/lib/mysql/dump.sql"
+  become: true

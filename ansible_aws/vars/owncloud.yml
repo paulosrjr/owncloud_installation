@@ -1,0 +1,15 @@
+repositories:
+  - "deb [arch=amd64] https://download.docker.com/linux/ubuntu xenial stable"
+repositories_urls_keys:
+  - https://download.docker.com/linux/ubuntu/gpg
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - wget
+  - software-properties-common
+  - lsb
+  - python-pip
+  - htop
+pip:
+  - docker-py

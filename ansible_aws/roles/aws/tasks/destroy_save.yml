@@ -1,0 +1,19 @@
+---
+- name: "Remove host and IP in hosts file"
+  file:
+    path: "{{playbook_dir}}/hosts"
+    state: "absent"
+    force: yes
+  register: AnsibleHostFile
+
+- name: "Remove generated data"
+  file: 
+    path: "{{playbook_dir}}/owncloud_data.yml"
+    state: "absent"
+  when: AnsibleHostFile|success
+
+- name: "Remove log data"
+  file: 
+    path: "{{playbook_dir}}/ansible.log"
+    state: "absent"
+  when: AnsibleHostFile|success

@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  tags:
+    - provider
+  vars:
+    cloud_infrastructure: false
+    destroy: "{{ ansible_env.DESTROY_AWS | default(aws_state) }}"
+  vars_files:
+    - "vars/default.yml"
+    - "vars/provider.yml"
+  roles:
+    - aws

@@ -1,0 +1,88 @@
+- name: "List VPC info"
+  ec2_vpc_net_facts:
+    filters:
+      "tag:App": OwnCloud
+    region: "{{aws_region}}"  
+  register: VPCInfo
+
+- debug:
+    msg: "{{VPCInfo}}"
+  when: run_in_debug == true
+
+- set_fact:
+    VPCId: "{{item.id}}"
+  with_items:
+    - "{{VPCInfo.vpcs}}"
+
+- name: "List VPC Subnet info"
+  ec2_vpc_subnet_facts:
+    filters:
+      "tag:App": OwnCloud
+    region: "{{aws_region}}"  
+  register: VpcSubnetInfo
+
+- debug:
+    msg: "{{VpcSubnetInfo}}"
+  when: run_in_debug == true
+
+- set_fact:
+    VpcSubnets: "{{VpcSubnetInfo.subnets}}"
+
+- name: "Removing a app subnet"
+  ec2_vpc_subnet:
+    state: absent
+    vpc_id: "{{item.vpc_id}}"
+    cidr: "{{item.cidr_block}}"
+    region: "{{aws_region}}"
+  with_items: 
+    - "{{VpcSubnets}}"
+
+- name: "List Route Tables info"
+  ec2_vpc_route_table_facts:
+    filters:
+      "tag:App": OwnCloud
+    region: "{{aws_region}}"
+  register: RouteTableInfo
+
+- debug:
+    msg: "{{RouteTableInfo}}"
+  when: run_in_debug == true
+
+- set_fact:
+    RouteTables: "{{RouteTableInfo.route_tables}}"
+
+- name: "Removing Route Table"
+  ec2_vpc_route_table:
+    route_table_id: "{{item.id}}"
+    vpc_id: "{{item.vpc_id}}"
+    region: "{{aws_region}}"
+    state: "absent"
+    lookup: "id"
+  with_items:
+    - "{{RouteTables}}"
+
+- name: "List Internet Gateway info"
+  ec2_vpc_igw_facts:
+    filters:
+      "tag:App": OwnCloud
+    region: "{{aws_region}}"
+  register: InternetGatewayInfo
+
+- debug:
+    msg: "{{InternetGatewayInfo}}"
+  when: run_in_debug == true
+
+- name: "Removing Internet Gateway"
+  ec2_vpc_igw:
+    vpc_id: "{{VPCId}}"
+    region: "{{aws_region}}"
+    state: "absent"
+  when: VPCId is defined
+
+- name: "Removing a VPC"
+  ec2_vpc_net:
+    name: "OwnCloudVPC"
+    cidr_block: "{{aws_cidr_block}}"
+    state: "absent"
+    region: "{{aws_region}}"
+  register: Destroyed

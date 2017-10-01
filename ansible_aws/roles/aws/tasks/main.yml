@@ -1,0 +1,6 @@
+---
+- include: ./create.yml
+  when: (destroy == "false") or (aws_state == "absent")
+
+- include: ./destroy.yml
+  when: (destroy == "true") or  (aws_state == "present")

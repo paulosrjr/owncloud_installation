@@ -1,0 +1,5 @@
+---
+- include: ./docker.yml
+- include: ./owncloud_installation.yml
+- include: ./owncloud_configuration.yml
+  when: owncloud_first_configuration == true

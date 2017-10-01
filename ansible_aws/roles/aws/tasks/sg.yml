@@ -1,8 +1,8 @@
 ---
 - name: "Create a Security Group"
   ec2_group:
-    name: "External SSH Access"
-    description: "External SSH Access"
+    name: "OwnCloud"
+    description: "OwnCloud"
     vpc_id: "{{ OwnCloudVpcId }}"
     region: "{{ aws_region }}"
     rules:
@@ -17,6 +17,14 @@
       - proto: "tcp"
         from_port: "443"
         to_port: "443"
+        cidr_ip: "0.0.0.0/0"
+      - proto: "tcp"
+        from_port: "8080"
+        to_port: "8080"
+        cidr_ip: "0.0.0.0/0"
+      - proto: "tcp"
+        from_port: "3306"
+        to_port: "3306"
         cidr_ip: "0.0.0.0/0"
   register: OwnCloudVpcSg
 
