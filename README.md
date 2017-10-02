@@ -1,6 +1,6 @@
 # OwnCloud Installation and Configuration
 ----------------------
-With Docker:
+*With Docker*:
 
 - `git clone git@github.com:paulosrjr/owncloud_installation.git`
 - Change `.env.sample` with your data, and move sample to `.env`
@@ -8,15 +8,16 @@ With Docker:
 - Follow the instructions with `./run help`
 
 ----------------------
-Standalone:
-
-`git clone git@github.com:paulosrjr/owncloud_installation.git`
-`cd ansible_aws`
-Execute:
+*Standalone*:
+```
+git clone git@github.com:paulosrjr/owncloud_installation.git
+cd ansible_aws
+```
+-> Execute:
 ```
 export AWS_ACCESS_KEY="PUT_YOU_KEY"
 export AWS_SECRET_ACCESS_KEY="PUT_YOU_KEY"
-ANSIBLE_HOST_KEY_CHECKING="False"
+export ANSIBLE_HOST_KEY_CHECKING="False"
 ```
 -> To create infra:
 ```
