@@ -29,7 +29,7 @@ To install and configure OwnCloud:
 Considerations:
 
 - If you need disable the auto-configuration in OwnCloud, change `owncloud_first_configuration` with `false` in `owncloud.yml` playbook file.
-- Mysql default parameters:
+- Mysql and OwnCloud default parameters and access:
 ```
 MYSQL_ROOT_PASSWORD: mypasswordtest
 MYSQL_DATABASE: owncloud
