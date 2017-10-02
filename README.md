@@ -30,10 +30,10 @@ Considerations:
 
 - If you need disable the auto-configuration in OwnCloud, change `owncloud_first_configuration` with `false` in `owncloud.yml` playbook file.
 - Mysql default parameters:
-    MYSQL_ROOT_PASSWORD: mypasswordtest
-    MYSQL_DATABASE: owncloud
-    MYSQL_USER: owncloud
-    MYSQL_PASSWORD: mypasswordtest
-    OWNCLOUD_ADMIN: admin
-    OWNCLOUD_PASSWORD: mypasswordtest
-    
+MYSQL_ROOT_PASSWORD: mypasswordtest
+MYSQL_DATABASE: owncloud
+MYSQL_USER: owncloud
+MYSQL_PASSWORD: mypasswordtest
+OWNCLOUD_ADMIN: admin
+OWNCLOUD_PASSWORD: mypasswordtest
+- Default URL is http://IP:8080    
