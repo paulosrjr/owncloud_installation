@@ -1,0 +1,11 @@
+#!/bin/bash
+
+source .env
+
+set -x 
+
+docker run -v $(pwd)/ansible_aws:/owncloud/ansible_aws \
+-e AWS_ACCESS_KEY="$AWS_ACCESS_KEY" \
+-e AWS_SECRET_ACCESS_KEY="$AWS_SECRET_ACCESS_KEY" \
+-e ANSIBLE_HOST_KEY_CHECKING="False" \
+docker.io/paulosrjr/ansible $1

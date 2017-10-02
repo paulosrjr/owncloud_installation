@@ -1,5 +1,6 @@
-owncloud_data
+owncloud_data*
 key
 *.log
 .vscode
 .env
+*.retry

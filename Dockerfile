@@ -1,10 +1,12 @@
 FROM fedora:26
 
-WORKDIR /app
+WORKDIR /owncloud
 
-COPY . /app
+COPY . /owncloud
 
 COPY entrypoint.sh /
+
+COPY ansible.cfg /etc/ansible/ansible.cfg
 
 RUN dnf install -y ansible python
 

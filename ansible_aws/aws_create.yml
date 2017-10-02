@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  tags:
+    - provider
+  vars:
+    cloud_infrastructure: false
+    destroy: "false"
+  vars_files:
+    - "vars/default.yml"
+    - "vars/provider.yml"
+  roles:
+    - aws
