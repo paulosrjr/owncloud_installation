@@ -12,7 +12,7 @@ Standalone:
 
 - `git clone git@github.com:paulosrjr/owncloud_installation.git`
 - `cd ansible_aws`
-    Execute:
+- Execute:
         - export AWS_ACCESS_KEY="PUT_YOU_KEY"
         - export AWS_SECRET_ACCESS_KEY="PUT_YOU_KEY"
 
@@ -20,11 +20,13 @@ To create infra:
 `ansible-playbook aws_create.yml`
 
 To remove infra:
-`ansible-playbook aws_create.yml`
+`ansible-playbook aws_remove.yml`
 
 To install and configure OwnCloud:
 `ansible-playbook owncloud.yml`
 
+To create infra and install and configure OwnCloud:
+`ansible-playbook aws_create.yml` && `ansible-playbook owncloud.yml`
 ----------------------
 Considerations:
 
@@ -38,4 +40,5 @@ MYSQL_PASSWORD: mypasswordtest
 OWNCLOUD_ADMIN: admin
 OWNCLOUD_PASSWORD: mypasswordtest
 ```
-- Default URL is http://IP:8080    
+- Default URL is http://IP:8080  (You can see IP in execution output or in AWS console) 
+
