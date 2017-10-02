@@ -1,4 +1,4 @@
-owncloud_data*
+owncloud_data.yml
 key
 *.log
 .vscode
