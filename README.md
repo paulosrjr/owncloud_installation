@@ -28,7 +28,7 @@ To install and configure OwnCloud:
 `ansible-playbook owncloud.yml`
 
 To create infra and install and configure OwnCloud:
-`ansible-playbook aws_create.yml` && `ansible-playbook owncloud.yml`
+`ansible-playbook aws_create.yml && ansible-playbook owncloud.yml`
 ----------------------
 Considerations:
 
