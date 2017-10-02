@@ -2,7 +2,7 @@
 ----------------------
 *With Docker*:
 
-- `git clone git@github.com:paulosrjr/owncloud_installation.git`
+- `git clone https://github.com/paulosrjr/owncloud_installation.git`
 - Change `.env.sample` with your data, and move sample to `.env`
 - Execute `run` (./run)
 - Follow the instructions with `./run help`
@@ -10,7 +10,7 @@
 ----------------------
 *Standalone*:
 ```
-git clone git@github.com:paulosrjr/owncloud_installation.git
+git clone https://github.com/paulosrjr/owncloud_installation.git
 cd ansible_aws
 ```
 -> Execute:
