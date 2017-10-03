@@ -11,8 +11,8 @@
   vars_files:
     - "vars/owncloud.yml"
   pre_tasks:
-    - name: "Installing python if not founded"
-      raw: test -e /usr/bin/python || (apt-get update && apt-get install -y python)
+    - name: "Installing python if not found"
+      raw: test -e /usr/bin/python || (apt-get update && apt-get install -y python-minimal)
     - name: "Configuring facts"
       setup:
   roles:
