@@ -1,39 +1,48 @@
-- name: Search ec2
-  ec2_remote_facts:
-    filters:
-      instance-state-name: running
-      "tag:App": "OwnCloud"
-    region: "{{aws_region}}"
-  register: Ec2Info
-
-- debug:
-    msg: "{{Ec2Info}}"
-  when: run_in_debug == true
-
-- set_fact:
-    Ec2Instances: "{{Ec2Info.instances}}"
-
-- name: "Removing a OwnCloud instance"
-  ec2:
-    state: "absent"
-    instance_id: '{{ item.id }}'
-    region: "{{ aws_region }}"
-  register: Ec2Destroyed
-  with_items: "{{ Ec2Instances }}"
-
-- debug:
-    msg: "{{ Ec2Destroyed }}"
-
-- name: "Wait instance"
-  pause:
-    seconds: 90
-
-- name: "Removing EIP"
-  ec2_eip:
-    public_ip: "{{ item.public_ip_address }}"
-    state: "absent"
-    release_on_disassociation: yes
-    region: "{{ aws_region }}"
-  with_items: "{{ Ec2Instances }}"
-  ignore_errors: true
+- block:
+    - name: Search ec2
+      ec2_remote_facts:
+        filters:
+          instance-state-name: running
+          "tag:App": "OwnCloud"
+        region: "{{aws_region}}"
+      register: Ec2Info
   
+    - debug:
+        msg: "{{Ec2Info}}"
+      when: run_in_debug == true
+  
+    - set_fact:
+        Ec2Instances: "{{Ec2Info.instances}}"
+  
+    - name: "Removing a OwnCloud instance"
+      ec2:
+        state: "absent"
+        instance_id: '{{ item.id }}'
+        region: "{{ aws_region }}"
+      register: Ec2Destroyed
+      with_items: "{{ Ec2Instances }}"
+  
+    - debug:
+        msg: "{{ Ec2Destroyed }}"
+  
+    - name: "Wait instance"
+      pause:
+        seconds: 90
+  
+    - name: "Removing EIP"
+      ec2_eip:
+        public_ip: "{{ item.public_ip_address }}"
+        state: "absent"
+        release_on_disassociation: yes
+        region: "{{ aws_region }}"
+      with_items: "{{ Ec2Instances }}"
+      ignore_errors: true
+  
+  rescue:
+    - name: "Send messages"
+      include_role:
+        name: messages
+      vars:
+        slack_message: "Error on network removal"
+    - fail:
+        msg: "Error on network removal"

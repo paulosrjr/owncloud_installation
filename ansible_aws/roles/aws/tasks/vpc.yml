@@ -1,78 +1,87 @@
----
-- name: "Create a VPC to work with OwnCloud"
-  ec2_vpc_net:
-    name: "OwnCloudVPC"
-    state: "{{aws_state}}"
-    cidr_block: "{{aws_cidr_block}}"
-    region: "{{aws_region}}"
-    resource_tags:
-      App: "OwnCloud"
-  register: OwnCloudVpc
+- block:
+    - name: "Create a VPC to work with OwnCloud"
+      ec2_vpc_net:
+        name: "OwnCloudVPC"
+        state: "{{aws_state}}"
+        cidr_block: "{{aws_cidr_block}}"
+        region: "{{aws_region}}"
+        resource_tags:
+          App: "OwnCloud"
+      register: OwnCloudVpc
 
-- debug:
-    msg: "{{OwnCloudVpc}}"
-  when: run_in_debug == true
+    - debug:
+        msg: "{{OwnCloudVpc}}"
+      when: run_in_debug == true
 
-- name: "Save VPC ID"
-  set_fact:
-    OwnCloudVpcId: "{{ OwnCloudVpc.vpc.id }}"
+    - name: "Save VPC ID"
+      set_fact:
+        OwnCloudVpcId: "{{ OwnCloudVpc.vpc.id }}"
 
-- name: "Create a app subnet"
-  ec2_vpc_subnet:
-    state: "{{aws_state}}"
-    vpc_id: "{{OwnCloudVpcId}}"
-    cidr: "{{aws_owncloud_subnet}}"
-    region: "{{aws_region}}"
-    az: "{{aws_region_az}}"
-    resource_tags:
-      Name: "OwnCloudSubnet"
-      App: "OwnCloud"
-  register: OwnCloudSubnet
+    - name: "Create a app subnet"
+      ec2_vpc_subnet:
+        state: "{{aws_state}}"
+        vpc_id: "{{OwnCloudVpcId}}"
+        cidr: "{{aws_owncloud_subnet}}"
+        region: "{{aws_region}}"
+        az: "{{aws_region_az}}"
+        resource_tags:
+          Name: "OwnCloudSubnet"
+          App: "OwnCloud"
+      register: OwnCloudSubnet
 
-- debug:
-    msg: "{{OwnCloudSubnet}}"
-  when: run_in_debug == true
+    - debug:
+        msg: "{{OwnCloudSubnet}}"
+      when: run_in_debug == true
 
-- name: "Save Subnet ID"
-  set_fact:
-    OwnCloudSubnetId: "{{ OwnCloudSubnet.subnet.id }}"
+    - name: "Save Subnet ID"
+      set_fact:
+        OwnCloudSubnetId: "{{ OwnCloudSubnet.subnet.id }}"
 
-- name: "Create a Internet Gateway"
-  ec2_vpc_igw:
-    state: "{{aws_state}}"
-    region: "{{aws_region}}"
-    vpc_id: "{{OwnCloudVpcId}}"
-  register: OwnCloudIgw
+    - name: "Create a Internet Gateway"
+      ec2_vpc_igw:
+        state: "{{aws_state}}"
+        region: "{{aws_region}}"
+        vpc_id: "{{OwnCloudVpcId}}"
+      register: OwnCloudIgw
 
-- debug:
-    msg: "{{OwnCloudIgw}}"
-  when: run_in_debug == true
+    - debug:
+        msg: "{{OwnCloudIgw}}"
+      when: run_in_debug == true
 
-- name: "Save Internet Gateway ID"
-  set_fact:
-    OwnCloudIgwId: "{{ OwnCloudIgw.gateway_id }}"
+    - name: "Save Internet Gateway ID"
+      set_fact:
+        OwnCloudIgwId: "{{ OwnCloudIgw.gateway_id }}"
 
-- name: "Creating Route Table"
-  ec2_vpc_route_table:
-    vpc_id: "{{OwnCloudVpcId}}"
-    region: "{{aws_region}}"
-    tags:
-      Name: "OwnCloudPublic"
-      App: "OwnCloud"
-    subnets:
-      - "{{ OwnCloudSubnetId }}"
-    routes:
-      - dest: 0.0.0.0/0
-        gateway_id: "{{ OwnCloudIgwId }}"
-    resource_tags:
-      Name: "OwnCloudRoute"
-      App: "OwnCloud"
-  register: OwnCloudRoute
+    - name: "Creating Route Table"
+      ec2_vpc_route_table:
+        vpc_id: "{{OwnCloudVpcId}}"
+        region: "{{aws_region}}"
+        tags:
+          Name: "OwnCloudPublic"
+          App: "OwnCloud"
+        subnets:
+          - "{{ OwnCloudSubnetId }}"
+        routes:
+          - dest: 0.0.0.0/0
+            gateway_id: "{{ OwnCloudIgwId }}"
+        resource_tags:
+          Name: "OwnCloudRoute"
+          App: "OwnCloud"
+      register: OwnCloudRoute
 
-- debug:
-    msg: "{{OwnCloudRoute}}"
-  when: run_in_debug == true
- 
-- name: "Save Route Table ID"
-  set_fact:
-    OwnCloudRouteId: "{{ OwnCloudRoute.route_table.id }}"
+    - debug:
+        msg: "{{OwnCloudRoute}}"
+      when: run_in_debug == true
+
+    - name: "Save Route Table ID"
+      set_fact:
+        OwnCloudRouteId: "{{ OwnCloudRoute.route_table.id }}"
+  
+  rescue:
+    - name: "Send messages"
+      include_role:
+        name: messages
+      vars:
+        slack_message: "Error on network creation"
+    - fail:
+        msg: "Error on network creation"

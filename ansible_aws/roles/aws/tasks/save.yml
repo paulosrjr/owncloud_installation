@@ -1,31 +1,53 @@
----
-- name: "Save host and IP in hosts file"
-  copy: 
-    content: |
-      [owncloud]
-      {{OwnCloudEIPIP}}
-    dest: "{{playbook_dir}}/hosts"
-    force: yes
-  register: ansible_host_file
+- block:
+    - name: "Save host and IP in hosts file"
+      copy:
+        content: |
+          [owncloud]
+          {{OwnCloudEIPIP}}
+        dest: "{{playbook_dir}}/hosts"
+        force: yes
+      register: ansible_host_file
 
-- name: "Save Key"
-  set_fact:
-    OwnCloudPriKeyVar: "{{ OwnCloudPriKeyContent | default('Key already exist in default path') }}"
-  ignore_errors: true
-  when: ansible_host_file|success
+    - name: "Save Key"
+      set_fact:
+        OwnCloudPriKeyVar: "{{ OwnCloudPriKeyContent | default('Key already exist in default path') }}"
+      ignore_errors: true
+      when: ansible_host_file|success
 
-- name: "Save generated data"
-  copy: 
-    content: |
-      "hostname": "owncloud"
-      "address": "{{OwnCloudEIPIP}}"
-      "id": "{{OwnCloudEIPId}}"
-      "key": "{{OwnCloudPriKeyVar}}"
-      "sg": "{{OwnCloudVpcSg}}"
-      "vpc": "{{OwnCloudVpcId}}"
-      "subnet": "{{OwnCloudSubnetId}}"
-      "igw": "{{OwnCloudIgwId}}"
-      "route": "{{OwnCloudRouteId}}"
-    dest: "{{playbook_dir}}/owncloud_data.yml"
-    force: yes
-  when: ansible_host_file|success
+    - name: "Save generated data"
+      copy:
+        content: |
+          "hostname": "owncloud"
+          "address": "{{OwnCloudEIPIP}}"
+          "id": "{{OwnCloudEIPId}}"
+          "key": "{{OwnCloudPriKeyVar}}"
+          "sg": "{{OwnCloudVpcSg}}"
+          "vpc": "{{OwnCloudVpcId}}"
+          "subnet": "{{OwnCloudSubnetId}}"
+          "igw": "{{OwnCloudIgwId}}"
+          "route": "{{OwnCloudRouteId}}"
+        dest: "{{playbook_dir}}/owncloud_data.yml"
+        force: yes
+      when: ansible_host_file|success
+
+    - name: "Save aws_ssh_config"
+      copy:
+        content: |
+          Host owncloud
+              User ubuntu
+              HostName {{OwnCloudEIPIP}}
+              IdentityFile ./key
+              UserKnownHostsFile=/dev/null
+              StrictHostKeyChecking no
+        dest: "{{playbook_dir}}/aws_ssh_config"
+        force: yes
+      when: ansible_host_file|success
+
+  rescue:
+    - name: "Send messages"
+      include_role:
+        name: messages
+      vars:
+        slack_message: "Error on save files"
+    - fail:
+        msg: "Error on save files"

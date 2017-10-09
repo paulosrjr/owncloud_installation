@@ -4,3 +4,15 @@
 - include: ./key.yml
 - include: ./ec2.yml
 - include: ./save.yml
+
+- name: "Send messages"
+  include_role:
+    name: messages
+  vars:
+    slack_message: "AWS infrastructure created"
+    
+- name: "Send messages"
+  include_role:
+    name: messages
+  vars:
+    slack_message: "AWS infrastructure created"

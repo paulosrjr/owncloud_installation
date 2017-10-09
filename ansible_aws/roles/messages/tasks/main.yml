@@ -1,0 +1,9 @@
+- name: "Send notification via Slack"
+  slack:
+    token: T1L8Z9V8C/B7EJ7G34H/hBy0epZPhguIHbaS6dE1a2aM
+    msg: '{{slack_message}}'
+    channel: #owncloud
+    username: Owncloud
+    icon_url: "https://lh3.googleusercontent.com/_lfhv7wzdSjbXLjEhUXxH6pBMmDjvqDp1OUVMkS-djLgUa0it47atsp7PIlHIIADb9I=w300"
+  delegate_to: localhost
+  

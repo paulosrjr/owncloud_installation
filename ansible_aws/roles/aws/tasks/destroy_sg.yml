@@ -1,23 +1,33 @@
-- name: "List VPC info"
-  ec2_vpc_net_facts:
-    filters:
-      "tag:App": OwnCloud
-    region: "{{ aws_region }}"  
-  register: VPCInfo
+- block:
+    - name: "List VPC info"
+      ec2_vpc_net_facts:
+        filters:
+          "tag:App": OwnCloud
+        region: "{{ aws_region }}"  
+      register: VPCInfo
 
-- debug:
-    msg: "{{ VPCInfo }}"
-  when: run_in_debug == true
+    - debug:
+        msg: "{{ VPCInfo }}"
+      when: run_in_debug == true
 
-- set_fact:
-    VPCId: "{{item.id }}"
-  with_items:
-    - "{{ VPCInfo.vpcs }}"
+    - set_fact:
+        VPCId: "{{item.id }}"
+      with_items:
+        - "{{ VPCInfo.vpcs }}"
 
-- name: "Remove a Security Group"
-  ec2_group:
-    name: "OwnCloud"
-    vpc_id: "{{ VPCId }}"
-    region: "{{ aws_region }}"
-    state: "absent"
-  when: VPCId is defined
+    - name: "Remove a Security Group"
+      ec2_group:
+        name: "OwnCloud"
+        vpc_id: "{{ VPCId }}"
+        region: "{{ aws_region }}"
+        state: "absent"
+      when: VPCId is defined
+  
+  rescue:
+    - name: "Send messages"
+      include_role:
+        name: messages
+      vars:
+        slack_message: "Error on SG removal"
+    - fail:
+        msg: "Error on SG removal"

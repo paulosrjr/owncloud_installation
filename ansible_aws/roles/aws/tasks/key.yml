@@ -1,47 +1,67 @@
-- name: "Check if key already exist locally"
-  stat: 
-    path: "{{playbook_dir}}/key"
-  delegate_to: localhost
-  register: OwnCloudPriKeyExist
+- block:
+    - name: "Check if key already exist locally"
+      stat: 
+        path: "{{playbook_dir}}/key"
+      delegate_to: localhost
+      register: OwnCloudPriKeyExist
+    - set_fact:
+        key_status: "{{OwnCloudPriKeyExist}}"
 
-- set_fact:
-    key_status: "{{OwnCloudPriKeyExist}}"
+  rescue:
+    - debug:
+        msg: "Error in KEY Check"
 
-- name: "Create a new private key"
-  ec2_key:
-    state: "{{aws_state}}"
-    name: owncloud
-    force: false
-    region: "{{aws_region}}"
-  register: OwnCloudPriKey
-  when: key_status.stat.exists == false
+- block:
+    - name: "Create a new private key"
+      ec2_key:
+        state: "{{aws_state}}"
+        name: owncloud
+        force: false
+        region: "{{aws_region}}"
+      register: OwnCloudPriKey
+      when: key_status.stat.exists == false
 
-- debug:
-    msg: "{{OwnCloudPriKey}}"
-  when: (run_in_debug == true) and (key_status.stat.exists == false)
+  rescue:
+    - name: "Remove private key"
+      ec2_key:
+        state: absent
+        name: owncloud
+        force: true
+        region: "{{aws_region}}"
+    - name: "Create a new private key"
+      ec2_key:
+        state: "{{aws_state}}"
+        name: owncloud
+        force: false
+        region: "{{aws_region}}"
+      register: OwnCloudPriKey
+      when: key_status.stat.exists == false
 
-- set_fact:
-    OwnCloudPriKeyContent: "{{ OwnCloudPriKey.key.private_key }}"
-  when: key_status.stat.exists == false
+- block:        
+    - debug:
+        msg: "{{OwnCloudPriKey}}"
+      when: (run_in_debug == true) and (key_status.stat.exists == false)
+    - set_fact:
+        OwnCloudPriKeyContent: "{{ OwnCloudPriKey.key.private_key }}"
+      when: key_status.stat.exists == false
+    - name: "Saving Key"
+      copy:
+        content: |
+          {{OwnCloudPriKeyContent}}
+        dest: "{{playbook_dir}}/key"
+      run_once: yes
+      delegate_to: localhost
+      register: OwnCloudPriKeySaved
+      when: key_status.stat.exists == false
+    - name: "Change permissions in private key"
+      local_action: file path="{{playbook_dir}}/key" mode=0400
+      when: (OwnCloudPriKeySaved|success) and (key_status.stat.exists == false)
 
-- name: "Saving Key"
-  copy:
-    content: |
-      {{OwnCloudPriKeyContent}}
-    dest: "{{playbook_dir}}/key"
-  run_once: yes
-  delegate_to: localhost
-  register: OwnCloudPriKeySaved
-  when: key_status.stat.exists == false
-
-- name: "Rollback private key"
-  ec2_key:
-    state: absent
-    name: owncloud
-    force: true
-    region: "{{aws_region}}"
-  when: (OwnCloudPriKeySaved|failed) and (key_status.stat.exists == true)
-
-- name: "Change permissions in private key"
-  local_action: file path="{{playbook_dir}}/key" mode=0400
-  when: (OwnCloudPriKeySaved|success) and (key_status.stat.exists == false)
+  rescue:
+    - name: "Send messages"
+      include_role:
+        name: messages
+      vars:
+        slack_message: "Error in KEY Check"
+    - fail:
+        msg: "Error in KEY Check"

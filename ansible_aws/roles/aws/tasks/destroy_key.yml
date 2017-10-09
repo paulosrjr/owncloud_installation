@@ -1,12 +1,21 @@
----
-- name: "Remove private key in provider"
-  ec2_key:
-    state: "absent"
-    name: owncloud
-    force: true
-    region: "{{aws_region}}"
+- block:
+    - name: "Remove private key in provider"
+      ec2_key:
+        state: "absent"
+        name: owncloud
+        force: true
+        region: "{{aws_region}}"
 
-- name: "Remove private key file"
-  file: 
-    path: "{{playbook_dir}}/key"
-    state: "absent"
+    - name: "Remove private key file"
+      file: 
+        path: "{{playbook_dir}}/key"
+        state: "absent"
+  
+  rescue:
+    - name: "Send messages"
+      include_role:
+        name: messages
+      vars:
+        slack_message: "Error on key removal"
+    - fail:
+        msg: "Error on key removal"

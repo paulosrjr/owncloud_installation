@@ -1,0 +1,6 @@
+Host owncloud
+    User ubuntu
+    HostName 52.7.36.206
+    IdentityFile ./key
+    UserKnownHostsFile=/dev/null
+    StrictHostKeyChecking no

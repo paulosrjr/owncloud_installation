@@ -1,37 +1,46 @@
----
-- name: "Create a Security Group"
-  ec2_group:
-    name: "OwnCloud"
-    description: "OwnCloud"
-    vpc_id: "{{ OwnCloudVpcId }}"
-    region: "{{ aws_region }}"
-    rules:
-      - proto: "tcp"
-        from_port: "22"
-        to_port: "22"
-        cidr_ip: "0.0.0.0/0"
-      - proto: "tcp"
-        from_port: "80"
-        to_port: "80"
-        cidr_ip: "0.0.0.0/0"
-      - proto: "tcp"
-        from_port: "443"
-        to_port: "443"
-        cidr_ip: "0.0.0.0/0"
-      - proto: "tcp"
-        from_port: "8080"
-        to_port: "8080"
-        cidr_ip: "0.0.0.0/0"
-      - proto: "tcp"
-        from_port: "3306"
-        to_port: "3306"
-        cidr_ip: "0.0.0.0/0"
-  register: OwnCloudVpcSg
+- block:
+    - name: "Create a Security Group"
+      ec2_group:
+        name: "OwnCloud"
+        description: "OwnCloud"
+        vpc_id: "{{ OwnCloudVpcId }}"
+        region: "{{ aws_region }}"
+        rules:
+          - proto: "tcp"
+            from_port: "22"
+            to_port: "22"
+            cidr_ip: "0.0.0.0/0"
+          - proto: "tcp"
+            from_port: "80"
+            to_port: "80"
+            cidr_ip: "0.0.0.0/0"
+          - proto: "tcp"
+            from_port: "443"
+            to_port: "443"
+            cidr_ip: "0.0.0.0/0"
+          - proto: "tcp"
+            from_port: "8080"
+            to_port: "8080"
+            cidr_ip: "0.0.0.0/0"
+          - proto: "tcp"
+            from_port: "3306"
+            to_port: "3306"
+            cidr_ip: "0.0.0.0/0"
+      register: OwnCloudVpcSg
 
-- debug:
-    msg: "{{OwnCloudVpcSg}}"
-  when: run_in_debug == true
+    - debug:
+        msg: "{{OwnCloudVpcSg}}"
+      when: run_in_debug == true
 
-- name: "Save Security Group ID"
-  set_fact:
-    OwnCloudVpcId: "{{ OwnCloudVpcSg.group_id }}"
+    - name: "Save Security Group ID"
+      set_fact:
+        OwnCloudVpcId: "{{ OwnCloudVpcSg.group_id }}"
+        
+  rescue:
+    - name: "Send messages"
+      include_role:
+        name: messages
+      vars:
+        slack_message: "Error in SG creation"
+    - fail:
+        msg: "Error in SG creation"
